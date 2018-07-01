@@ -23,6 +23,7 @@ object ActorCountDown extends App {
         other ! CountDown(n-1)
       }
       case CountDown(n) => {
+        println(self)
         if (n > 0){
           println(n)
           sender ! CountDown(n-1)
@@ -34,9 +35,10 @@ object ActorCountDown extends App {
   }
 
   val system = ActorSystem("CountDownSystem")
-  val actor1 = system.actorOf(Props[CountDown], "CountDown1")
-  val actor2 = system.actorOf(Props[CountDown], "CountDown2")
+  val actor1 = system.actorOf(Props[CountDownActor], "CountDown1")
+  val actor2 = system.actorOf(Props[CountDownActor], "CountDown2")
 
 
+  // Tell the first actor to start counting down from ten along with the second actor.
   actor1 ! StartCounting(10, actor2)
 }
