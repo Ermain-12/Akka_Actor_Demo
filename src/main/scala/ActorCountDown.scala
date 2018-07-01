@@ -13,14 +13,30 @@ object ActorCountDown extends App {
       other: The Actor with which we will be doing the counting
    */
   case class StartCounting(n: Int, other: ActorRef)
-  case class CountDown()
+  case class CountDown(n: Int)
+
+  // Create the Actor object
   class CountDownActor extends Actor{
     override def receive: Receive = {
-      case s: String => println("Received a string")
-      case i: Int => println("Received an Integer")
+      case StartCounting(n, other) => {
+        println(n)
+        other ! CountDown(n-1)
+      }
+      case CountDown(n) => {
+        if (n > 0){
+          println(n)
+          sender ! CountDown(n-1)
+        }else{
+          context.system.terminate()
+        }
+      }
     }
   }
 
   val system = ActorSystem("CountDownSystem")
-  val actor = system.actorOf(Props[CountDownActor])
+  val actor1 = system.actorOf(Props[CountDown], "CountDown1")
+  val actor2 = system.actorOf(Props[CountDown], "CountDown2")
+
+
+  actor1 ! StartCounting(10, actor2)
 }
